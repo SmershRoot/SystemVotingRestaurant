@@ -1,0 +1,25 @@
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+select 2, 'I', 'passwd', 'Smersh', 'Last', 'Patronymic', 0 from dual;/
+
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+  select 3, 'admin', 'passwd', 'Admin', 'Last', 'Patronymic', 0 from dual;/
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+  select 4, 'user1', 'passwd', 'User1', 'Last', 'Patronymic', 2 from dual;/
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+  select 5, 'user2', 'passwd', 'User2', 'Last', 'Patronymic', 2 from dual;/
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+  select 6, 'user3', 'passwd', 'User3', 'Last', 'Patronymic', 2 from dual;/
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+  select 7, 'user4', 'passwd', 'User4', 'Last', 'Patronymic', 2 from dual;/
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+select 8, 'user', 'passwd', 'User5', 'Last', 'Patronymic', 2 from dual;/
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+  select 9, 'user', 'passwd', 'User6', 'Last', 'Patronymic', 2 from dual;/
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+  select 10, 'user', 'passwd', 'User7', 'Last', 'Patronymic', 2 from dual;/
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+  select 11, 'user', 'passwd', 'User8', 'Last', 'Patronymic', 2 from dual;/
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+  select 12, 'user', 'passwd', 'User9', 'Last', 'Patronymic', 2 from dual;/
+insert into USER (ID, LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, PATRONYMIC, SECURITY_ROLE_ID)
+  select 13, 'user', 'passwd', 'User10', 'Last', 'Patronymic', 2 from dual;/
