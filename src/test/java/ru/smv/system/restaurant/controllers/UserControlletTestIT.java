@@ -8,11 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -42,7 +37,7 @@ public class UserControlletTestIT {
     @Autowired
     ObjectMapper objectMapper;
 
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @BeforeEach
     public void setUp(){
@@ -84,5 +79,36 @@ public class UserControlletTestIT {
                 .content(jsonUserDTO);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
         Assert.isTrue(200 == mvcResult.getResponse().getStatus(), "Ошибка создания пользователя");
+
+        String responseUserDTO = mvcResult.getResponse().getContentAsString();
+        user = objectMapper.readValue(responseUserDTO, UserDTO.class);
+
+        Assert.isTrue(null != user.getId(), "Ошибка создания пользователя, возвращаемый объект не содержит ИД");
+
+        user.setLastName("testLastName_test");
+        user.setFirstName("testFirstName_test");
+        user.setPatronymic("testPatronymic_test");
+        jsonUserDTO = objectMapper.writeValueAsString(user);
+
+        requestBuilder = MockMvcRequestBuilders.put(AccessPath.API_USERS)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(jsonUserDTO);
+        mvcResult = mockMvc.perform(requestBuilder).andReturn();
+        Assert.isTrue(200 == mvcResult.getResponse().getStatus(), "Ошибка обновления пользователя");
+
+        requestBuilder = MockMvcRequestBuilders.delete(AccessPath.API_USERS_SUD, user.getId());
+        mvcResult = mockMvc.perform(requestBuilder).andReturn();
+        Assert.isTrue(204 == mvcResult.getResponse().getStatus(), "Ошибка удаления пользователя");
     }
+
+    @Test
+    void changePassword() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder =
+                MockMvcRequestBuilders.put(AccessPath.API_USERS_PASSWORD, 1L)
+                .param("current", "")
+                .param("new", "");
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
+        Assert.isTrue(204 == mvcResult.getResponse().getStatus(), "Ошибка обновления пароля пользователя");
+    }
+
 }

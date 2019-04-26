@@ -25,16 +25,20 @@ import java.util.stream.Collectors;
 @RestController
 public class UserController {
 
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    ObjectMapper objectMapper;
+    public UserController(UserRepository userRepository, ObjectMapper objectMapper) {
+        this.userRepository = userRepository;
+        this.objectMapper = objectMapper;
+    }
 
     /**
      * Получение всех пользователей
      *
-     * @return
+     * @return перечень пользователей системы
      */
     @RequestMapping(path = AccessPath.API_USERS, method = RequestMethod.GET)
     public List<UserDTO> getUsers(
@@ -54,7 +58,7 @@ public class UserController {
         }
 
         List<UserEntity> users = userRepository.findAll(sort);
-        return users.stream().map(u -> new UserDTO(u)).collect(Collectors.toList());
+        return users.stream().map(UserDTO::new).collect(Collectors.toList());
     }
 
     @RequestMapping(path = AccessPath.API_USERS, method = RequestMethod.POST)
@@ -108,7 +112,8 @@ public class UserController {
         return userEntity;
     }
 
-    @RequestMapping(path = AccessPath.API_USERS_SUD_PASSWORD)
+    @RequestMapping(path = AccessPath.API_USERS_PASSWORD, method = RequestMethod.PUT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changePassword(
             @PathVariable(name = "userId") Long userId,
             @RequestParam(name = "current", required = false) String currentPass,
@@ -127,7 +132,7 @@ public class UserController {
 
         //Проверяем права пользователя
         //Если не Админ
-        if(!(SecurityRole.ADMIN).equals(user.getSecurityRoleId())) {
+        if(SecurityRole.ADMIN.getId()!=(user.getSecurityRoleId())) {
             if (user.getPassword().equals(createMd5FromText(currentPass))) {
                 user.setPassword(createMd5FromText(newPass));
             }
@@ -145,11 +150,11 @@ public class UserController {
         md.update(text.getBytes());
         byte[] digest = md.digest();
         BigInteger bigInt = new BigInteger(1,digest);
-        String hashtext = bigInt.toString(16);
+        StringBuilder hashtext = new StringBuilder(bigInt.toString(16));
         while(hashtext.length() < 32 ){
-            hashtext = "0"+hashtext;
+            hashtext.insert(0, "0");
         }
-        return hashtext;
+        return hashtext.toString();
     }
 
 

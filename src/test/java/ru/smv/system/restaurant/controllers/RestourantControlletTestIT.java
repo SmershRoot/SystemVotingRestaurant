@@ -8,11 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -26,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import ru.smv.system.restaurant.constants.AccessPath;
-import ru.smv.system.restaurant.models.db.UserEntity;
 import ru.smv.system.restaurant.models.dto.MenuDTO;
 import ru.smv.system.restaurant.models.dto.RestaurantDTO;
 import ru.smv.system.restaurant.utils.TestUtils;
@@ -39,7 +33,7 @@ import java.util.Set;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @Transactional
-class RestourantControlletTestIT {
+class RestaurantControllerTestIT {
 
     @Autowired
     WebApplicationContext webApplicationContext;
@@ -74,7 +68,14 @@ class RestourantControlletTestIT {
     }
 
     @Test
-    void createRestaurant() throws Exception {
+    void getRestaurant() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(AccessPath.API_RESTAURANTS_SUD, 1L);
+        ResultActions resultActions = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
+        String response = resultActions.andReturn().getResponse().getContentAsString();
+    }
+
+    @Test
+    void createAndUpdateAndDeleteRestaurant() throws Exception {
         RestaurantDTO restaurant = new RestaurantDTO();
         restaurant.setAddress("testAddress");
         restaurant.setEmail("testEmail");
@@ -113,16 +114,10 @@ class RestourantControlletTestIT {
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(jsonRestaurantDTO);
         mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        Assert.isTrue(200 == mvcResult.getResponse().getStatus(), "Ошибка создания ресторана");
+        Assert.isTrue(200 == mvcResult.getResponse().getStatus(), "Ошибка обновления ресторана");
+
+        requestBuilder = MockMvcRequestBuilders.delete(AccessPath.API_RESTAURANTS_SUD, restaurant.getId());
+        mvcResult = mockMvc.perform(requestBuilder).andReturn();
+        Assert.isTrue(204 == mvcResult.getResponse().getStatus(), "Ошибка удаления ресторана");
     }
-
-    @Test
-    void getRestaurant() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(AccessPath.API_RESTAURANTS_SUD, 1L);
-        ResultActions resultActions = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
-        String response = resultActions.andReturn().getResponse().getContentAsString();
-    }
-
-
-
 }
