@@ -12,6 +12,7 @@ public class TestUtils {
     public static MockHttpSession getMockHttpSession(){
         MockHttpSession session = new MockHttpSession();
         UserDTO user = new UserDTO();
+        user.setId(2L);
         user.setLogin("I");
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(user, "");

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import ru.smv.system.restaurant.constants.AccessPath;
 import ru.smv.system.restaurant.utils.TestUtils;
@@ -53,4 +55,10 @@ public class VotingControllerTestIT {
         String response = resultActions.andReturn().getResponse().getContentAsString();
     }
 
+    @Test
+    public void voting() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post(AccessPath.API_RESTAURANTS_SUD_VOTING, 1L);
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
+        Assert.isTrue(204 == mvcResult.getResponse().getStatus(), "Ошибка создания записи об голосованити");
+    }
 }

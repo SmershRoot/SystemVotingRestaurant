@@ -15,6 +15,7 @@ public class UserDTO {
     private String patronymic;
 
     public UserDTO (UserEntity user){
+        this.id = user.getId();
         this.login = user.getLogin();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();

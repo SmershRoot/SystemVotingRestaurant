@@ -62,8 +62,9 @@ public class UserController {
     }
 
     @RequestMapping(path = AccessPath.API_USERS, method = RequestMethod.POST)
-    public UserDTO createUser(@RequestBody UserDTO userDto){
+    public UserDTO createUser(@RequestBody UserDTO userDto) throws NoSuchAlgorithmException {
         Assert.notNull(userDto, "Пользователь не заполнен.");
+        Assert.notNull(userDto.getPassword(), "У пользователя не задан пароль.");
         UserEntity user = addDataUserEntityFromDto(new UserEntity(), userDto);
 
         return new UserDTO(userRepository.save(user));
@@ -82,7 +83,7 @@ public class UserController {
     @RequestMapping(path = AccessPath.API_USERS, method = RequestMethod.PUT)
     public UserDTO updateUser(
             @RequestBody UserDTO userDto
-    ){
+    ) throws NoSuchAlgorithmException {
         Assert.notNull(userDto, "Пользователь не заполнен.");
         Optional<UserEntity> optionalUser = userRepository.findById(userDto.getId());
         if(!optionalUser.isPresent()){
@@ -102,12 +103,15 @@ public class UserController {
         userRepository.deleteById(userId);
     }
 
-    private UserEntity addDataUserEntityFromDto(UserEntity userEntity, UserDTO userDto){
+    private UserEntity addDataUserEntityFromDto(UserEntity userEntity, UserDTO userDto) throws NoSuchAlgorithmException {
         userEntity.setLogin(userDto.getLogin());
         userEntity.setFirstName(userDto.getFirstName());
         userEntity.setLastName(userDto.getLastName());
         userEntity.setPatronymic(userDto.getPatronymic());
         userEntity.setSecurityRoleId(SecurityRole.USER.getId());
+        if(userDto.getPassword()!=null){
+            userEntity.setPassword(createMd5FromText(userDto.getPassword()));
+        }
 
         return userEntity;
     }

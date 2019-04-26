@@ -64,7 +64,7 @@ public class UserControlletTestIT {
     }
 
     @Test
-    public void createUser() throws Exception {
+    public void createAndUserAndDeleteUserAndChangePassword() throws Exception {
         UserDTO user = new UserDTO();
         user.setLogin("login");
         user.setPassword("dfd");
@@ -96,19 +96,16 @@ public class UserControlletTestIT {
         mvcResult = mockMvc.perform(requestBuilder).andReturn();
         Assert.isTrue(200 == mvcResult.getResponse().getStatus(), "Ошибка обновления пользователя");
 
+        requestBuilder =
+                MockMvcRequestBuilders.put(AccessPath.API_USERS_PASSWORD, 38L)
+                        .param("current", "dfd")
+                        .param("new", "fffffffff");
+        mvcResult = mockMvc.perform(requestBuilder).andReturn();
+        Assert.isTrue(204 == mvcResult.getResponse().getStatus(), "Ошибка обновления пароля пользователя");
+
         requestBuilder = MockMvcRequestBuilders.delete(AccessPath.API_USERS_SUD, user.getId());
         mvcResult = mockMvc.perform(requestBuilder).andReturn();
         Assert.isTrue(204 == mvcResult.getResponse().getStatus(), "Ошибка удаления пользователя");
-    }
-
-    @Test
-    void changePassword() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder =
-                MockMvcRequestBuilders.put(AccessPath.API_USERS_PASSWORD, 1L)
-                .param("current", "")
-                .param("new", "");
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        Assert.isTrue(204 == mvcResult.getResponse().getStatus(), "Ошибка обновления пароля пользователя");
     }
 
 }
