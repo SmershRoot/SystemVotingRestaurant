@@ -61,7 +61,7 @@ class RestaurantControllerTestIT {
         ResultActions resultActions = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
         String response = resultActions.andReturn().getResponse().getContentAsString();
 
-     //   CollectionType typeResult = objectMapper.getTypeFactory().constructCollectionType(List.class, RestaurantDTO.class);
+        //   CollectionType typeResult = objectMapper.getTypeFactory().constructCollectionType(List.class, RestaurantDTO.class);
         List<RestaurantDTO> restaurantsDTO = objectMapper.readValue(response, new TypeReference<List<RestaurantDTO>>(){});
 
         Assert.isTrue(restaurantsDTO.size() > 0, "Запрос не вернул рестораны");
