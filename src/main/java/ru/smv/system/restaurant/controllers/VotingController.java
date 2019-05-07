@@ -38,7 +38,7 @@ public class VotingController {
     @RequestMapping(path = AccessPath.API_RESTAURANTS_SUD_VOTING, method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void voting(
-            @PathVariable(name = "restaurantId") Long restaurantId
+            @PathVariable Long restaurantId
     ) throws NotFoundException {
         Assert.notNull(restaurantId, "Параметр строки обращения не корректен.");
 
@@ -76,8 +76,7 @@ public class VotingController {
 
     @RequestMapping(path = AccessPath.API_RESTAURANTS_VOTING, method = RequestMethod.GET)
     public Map<RestaurantDTO, Long> getResultVoting(
-            @PathVariable(name = "reportDate",
-                    required = false)
+            @PathVariable(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate reportDate
     ){
         Map<RestaurantDTO, Long> result = new HashMap<>();

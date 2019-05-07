@@ -12,7 +12,6 @@ import ru.smv.system.restaurant.models.db.UserEntity;
 import ru.smv.system.restaurant.models.dto.UserDTO;
 import ru.smv.system.restaurant.repository.UserRepository;
 import ru.smv.system.restaurant.security.SecurityRole;
-import ru.smv.system.restaurant.security.SecurityUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -72,7 +71,7 @@ public class UserController {
     }
 
     @RequestMapping(path = AccessPath.API_USERS_SUD, method = RequestMethod.GET)
-    public UserDTO getUser(@PathVariable(name = "userId") Long userId){
+    public UserDTO getUser(@PathVariable Long userId){
         Assert.notNull(userId, "Параметр строки обращения не корректен.");
         Optional<UserEntity> optionalUser = userRepository.findById(userId);
         if(optionalUser.isPresent()){
@@ -98,7 +97,7 @@ public class UserController {
 
     @RequestMapping(path = AccessPath.API_USERS_SUD, method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable(name = "userId") Long userId){
+    public void deleteUser(@PathVariable Long userId){
         Assert.notNull(userId, "Параметр строки обращения не корректен.");
         //TODO Если по себе меняем или админ
         userRepository.deleteById(userId);
@@ -120,7 +119,7 @@ public class UserController {
     @RequestMapping(path = AccessPath.API_USERS_PASSWORD, method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changePassword(
-            @PathVariable(name = "userId") Long userId,
+            @PathVariable Long userId,
             @RequestParam(name = "current", required = false) String currentPass,
             @RequestParam(name = "new") String newPass
     ) throws NoSuchAlgorithmException {

@@ -33,8 +33,7 @@ public class RestaurantController {
             @RequestParam(name = "filter", required = false) String jsonFilter,
             @RequestParam(name = "sort", required = false) String jsonSort,
             @RequestParam(name = "page", required = false) Integer page,
-            @RequestParam(name = "pageSize", required = false) Integer pageSize,
-            @RequestParam(name = "withMenu", required = false) Boolean withMenu
+            @RequestParam(name = "pageSize", required = false) Integer pageSize
     ) throws IOException {
         Sort sort;
         if(jsonSort == null || jsonSort.isEmpty()) {
@@ -49,7 +48,7 @@ public class RestaurantController {
 
     @RequestMapping(path = AccessPath.API_RESTAURANTS_SUD, method = RequestMethod.GET)
     public RestaurantDTO getRestaurant(
-            @PathVariable(name = "restaurantId") Long restaurantId
+            @PathVariable Long restaurantId
             ) throws NotFoundException {
         Assert.notNull(restaurantId, "Параметр строки обращения не корректен.");
         RestaurantEntity restaurantEntity = restaurantRepository.findById(restaurantId)
@@ -112,7 +111,7 @@ public class RestaurantController {
 
     @RequestMapping(path = AccessPath.API_RESTAURANTS_SUD, method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteRestaurant(@PathVariable(name = "restaurantId") Long restaurantId){
+    public void deleteRestaurant(@PathVariable Long restaurantId){
         Assert.notNull(restaurantId, "Параметр строки обращения не корректен.");
         //TODO только администратор
         restaurantRepository.deleteById(restaurantId);
