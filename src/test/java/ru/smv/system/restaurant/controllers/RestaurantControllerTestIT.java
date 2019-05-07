@@ -90,7 +90,7 @@ class RestaurantControllerTestIT {
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(jsonRestaurantDTO);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        Assert.isTrue(200 == mvcResult.getResponse().getStatus(), "Ошибка создания ресторана");
+        Assert.isTrue(201 == mvcResult.getResponse().getStatus(), "Ошибка создания ресторана");
 
         String responseRestaurantDTO = mvcResult.getResponse().getContentAsString();
         restaurant = objectMapper.readValue(responseRestaurantDTO, RestaurantDTO.class);
@@ -114,7 +114,14 @@ class RestaurantControllerTestIT {
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(jsonRestaurantDTO);
         mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        Assert.isTrue(200 == mvcResult.getResponse().getStatus(), "Ошибка обновления ресторана");
+        Assert.isTrue(200 == mvcResult.getResponse().getStatus(), "Ошибка обновления ресторана. Без меню.");
+
+        requestBuilder = MockMvcRequestBuilders.put(AccessPath.API_RESTAURANTS)
+                .param("updateMenu", "true")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(jsonRestaurantDTO);
+        mvcResult = mockMvc.perform(requestBuilder).andReturn();
+        Assert.isTrue(200 == mvcResult.getResponse().getStatus(), "Ошибка обновления ресторана. С меню.");
 
         requestBuilder = MockMvcRequestBuilders.delete(AccessPath.API_RESTAURANTS_SUD, restaurant.getId());
         mvcResult = mockMvc.perform(requestBuilder).andReturn();

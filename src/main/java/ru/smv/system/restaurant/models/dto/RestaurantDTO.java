@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.smv.system.restaurant.models.db.RestaurantEntity;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,7 @@ public class RestaurantDTO {
     private String note;
     private String email;
     private String timeWork;
-    private Set<MenuDTO> menus;
+    private Set<MenuDTO> menus = new HashSet<>();
 
     public RestaurantDTO(RestaurantEntity restaurant){
         this.id = restaurant.getId();

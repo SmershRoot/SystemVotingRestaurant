@@ -66,16 +66,13 @@ public class RestaurantController {
     ){
         //TODO только администратор
         Assert.notNull(restaurant, "Ресторан не заполнен.");
-        RestaurantEntity restaurantEntity = addDataRestaurantEntityFromDto(new RestaurantEntity(), restaurant);
+        RestaurantEntity restaurantEntity = addDataRestaurantEntityFromDto(new RestaurantEntity(), restaurant, false);
         return new RestaurantDTO(restaurantRepository.save(restaurantEntity));
     }
 
     @RequestMapping(path = AccessPath.API_RESTAURANTS, method = RequestMethod.PUT)
     public RestaurantDTO updateRestaurant(
-            //TODO Думаю сделать обновление ресторана по 2-м типам:
-            //- если массив меню пустой - удаляем меню
-            //- если null - не трогаем
-    //        @PathVariable(name = "restaurantId") Long restaurantId,
+            @RequestParam(name = "updateMenu" ,required = false, defaultValue = "false") boolean updateMenu,
             @RequestBody RestaurantDTO restaurant
     ) throws NotFoundException {
         //TODO только администратор
@@ -83,11 +80,13 @@ public class RestaurantController {
         RestaurantEntity restaurantEntity = restaurantRepository.findById(restaurant.getId())
                 .orElseThrow(() -> new NotFoundException(
                         "Ресторан не найден. Возможно данный ресторан отсутствует в системе."));
-        restaurantEntity =  addDataRestaurantEntityFromDto(restaurantEntity, restaurant);
+        restaurantEntity =  addDataRestaurantEntityFromDto(restaurantEntity, restaurant, updateMenu);
         return new RestaurantDTO(restaurantRepository.save(restaurantEntity));
     }
 
-    private RestaurantEntity addDataRestaurantEntityFromDto(RestaurantEntity restaurantEntity, RestaurantDTO restaurantDTO){
+    private RestaurantEntity addDataRestaurantEntityFromDto(RestaurantEntity restaurantEntity,
+                                                            RestaurantDTO restaurantDTO,
+                                                            boolean updateMenu){
         restaurantEntity.setName(restaurantDTO.getName());
         restaurantEntity.setPhone(restaurantDTO.getPhone());
         restaurantEntity.setAddress(restaurantDTO.getAddress());
@@ -95,7 +94,7 @@ public class RestaurantController {
         restaurantEntity.setEmail(restaurantDTO.getEmail());
         restaurantEntity.setTimeWork(restaurantDTO.getTimeWork());
 
-        if(restaurantEntity.getId()!=null) {
+        if(updateMenu) {
             Set<MenuDTO> menus = restaurantDTO.getMenus();
             for (MenuDTO menu : menus) {
                 MenuEntity menuEntity = new MenuEntity();
@@ -118,8 +117,5 @@ public class RestaurantController {
         //TODO только администратор
         restaurantRepository.deleteById(restaurantId);
     }
-
-
-
-
+    
 }
