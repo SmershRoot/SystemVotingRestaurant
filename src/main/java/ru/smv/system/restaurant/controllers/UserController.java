@@ -48,7 +48,7 @@ public class UserController {
             @RequestParam(name = "pageSize", required = false) Integer pageSize
     ) throws IOException {
 //        PageRequest.of(page, pageSize, sort);
-        SecurityUtils.currentAuthentication();
+//        SecurityUtils.currentAuthentication();
 
         Sort sort;
         if(jsonSort == null || jsonSort.isEmpty()){
@@ -62,6 +62,7 @@ public class UserController {
     }
 
     @RequestMapping(path = AccessPath.API_USERS, method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
     public UserDTO createUser(@RequestBody UserDTO userDto) throws NoSuchAlgorithmException {
         Assert.notNull(userDto, "Пользователь не заполнен.");
         Assert.notNull(userDto.getPassword(), "У пользователя не задан пароль.");
@@ -127,6 +128,8 @@ public class UserController {
         Assert.notNull(newPass, "Пароль не может быть пустым.");
         Assert.isTrue(!newPass.isEmpty(), "Пароль не может быть пустым.");
 
+//        UserDTO userCurrent = SecurityUtils.currentAuthentication();
+
         Optional<UserEntity> optionalUser = userRepository.findById(userId);
         if(!optionalUser.isPresent()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
@@ -136,7 +139,7 @@ public class UserController {
 
         //Проверяем права пользователя
         //Если не Админ
-        if(SecurityRole.ADMIN.getId()!=(user.getSecurityRoleId())) {
+        if(SecurityRole.ADMIN.getId()!=(user/*Current*/.getSecurityRoleId())) {
             if (user.getPassword().equals(createMd5FromText(currentPass))) {
                 user.setPassword(createMd5FromText(newPass));
             }

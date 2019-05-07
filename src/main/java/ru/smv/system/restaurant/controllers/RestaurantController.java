@@ -60,6 +60,7 @@ public class RestaurantController {
     }
 
     @RequestMapping(path = AccessPath.API_RESTAURANTS, method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
     public RestaurantDTO createRestaurant(
             @RequestBody RestaurantDTO restaurant
     ){
