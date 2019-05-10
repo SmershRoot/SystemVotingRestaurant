@@ -8,10 +8,13 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.smv.system.restaurant.constants.AccessPath;
+import ru.smv.system.restaurant.exception.ForbiddenException;
 import ru.smv.system.restaurant.models.db.UserEntity;
 import ru.smv.system.restaurant.models.dto.UserDTO;
 import ru.smv.system.restaurant.repository.UserRepository;
+import ru.smv.system.restaurant.security.AuthorizedUser;
 import ru.smv.system.restaurant.security.SecurityRole;
+import ru.smv.system.restaurant.security.SecurityUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -47,7 +50,10 @@ public class UserController {
             @RequestParam(name = "pageSize", required = false) Integer pageSize
     ) throws IOException {
 //        PageRequest.of(page, pageSize, sort);
-//        SecurityUtils.currentAuthentication();
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN)){
+            throw new ForbiddenException();
+        }
 
         Sort sort;
         if(jsonSort == null || jsonSort.isEmpty()){

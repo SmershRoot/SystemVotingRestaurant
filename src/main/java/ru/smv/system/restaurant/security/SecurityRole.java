@@ -1,6 +1,8 @@
 package ru.smv.system.restaurant.security;
 
-public enum SecurityRole {
+import org.springframework.security.core.GrantedAuthority;
+
+public enum SecurityRole  implements GrantedAuthority {
 
     ADMIN(0),
     USER(2);
@@ -22,5 +24,10 @@ public enum SecurityRole {
             }
         }
         return USER;
+    }
+
+    @Override
+    public String getAuthority() {
+        return name();
     }
 }

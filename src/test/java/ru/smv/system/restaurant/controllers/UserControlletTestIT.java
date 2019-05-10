@@ -44,10 +44,10 @@ public class UserControlletTestIT {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .alwaysDo(MockMvcResultHandlers.print())
                 .build();
-        setAuthentification();
+        setAuthentication();
     }
 
-    private void setAuthentification(){
+    private void setAuthentication(){
         TestUtils.getMockHttpSession();
     }
 
@@ -78,7 +78,7 @@ public class UserControlletTestIT {
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(jsonUserDTO);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        Assert.isTrue(200 == mvcResult.getResponse().getStatus(), "Ошибка создания пользователя");
+        Assert.isTrue(201 == mvcResult.getResponse().getStatus(), "Ошибка создания пользователя");
 
         String responseUserDTO = mvcResult.getResponse().getContentAsString();
         user = objectMapper.readValue(responseUserDTO, UserDTO.class);

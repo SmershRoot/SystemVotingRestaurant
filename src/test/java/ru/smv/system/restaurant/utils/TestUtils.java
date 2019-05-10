@@ -5,15 +5,23 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import ru.smv.system.restaurant.models.db.UserEntity;
 import ru.smv.system.restaurant.models.dto.UserDTO;
+import ru.smv.system.restaurant.security.AuthorizedUser;
+import ru.smv.system.restaurant.security.SecurityRole;
 
 public class TestUtils {
 
     public static MockHttpSession getMockHttpSession(){
         MockHttpSession session = new MockHttpSession();
-        UserDTO user = new UserDTO();
-        user.setId(2L);
-        user.setLogin("I");
+        UserEntity userEntity = new UserEntity();
+
+        userEntity.setId(2L);
+        userEntity.setLogin("I");
+        userEntity.setSecurityRoleId(SecurityRole.ADMIN.getId());
+        userEntity.setPassword("1");
+
+        AuthorizedUser user = new AuthorizedUser(userEntity);
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(user, "");
         SecurityContext securityContext = SecurityContextHolder.getContext();

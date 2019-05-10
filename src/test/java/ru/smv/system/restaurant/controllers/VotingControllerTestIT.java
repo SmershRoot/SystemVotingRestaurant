@@ -41,10 +41,10 @@ public class VotingControllerTestIT {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .alwaysDo(MockMvcResultHandlers.print())
                 .build();
-        setAuthentification();
+        setAuthentication();
     }
 
-    private void setAuthentification(){
+    private void setAuthentication(){
         TestUtils.getMockHttpSession();
     }
 

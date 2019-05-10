@@ -48,10 +48,10 @@ class RestaurantControllerTestIT {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .alwaysDo(MockMvcResultHandlers.print())
                 .build();
-        setAuthentification();
+        setAuthentication();
     }
 
-    private void setAuthentification(){
+    private void setAuthentication(){
         TestUtils.getMockHttpSession();
     }
 
@@ -70,8 +70,7 @@ class RestaurantControllerTestIT {
     @Test
     void getRestaurant() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(AccessPath.API_RESTAURANTS_SUD, 1L);
-        ResultActions resultActions = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
-        String response = resultActions.andReturn().getResponse().getContentAsString();
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test

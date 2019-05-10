@@ -50,6 +50,7 @@ public class RestaurantController {
     public RestaurantDTO getRestaurant(
             @PathVariable Long restaurantId
             ) throws NotFoundException {
+        //TODO только зарегистрировавшийся
         Assert.notNull(restaurantId, "Параметр строки обращения не корректен.");
         RestaurantEntity restaurantEntity = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new NotFoundException(

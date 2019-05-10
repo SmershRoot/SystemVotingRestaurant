@@ -16,6 +16,7 @@ import ru.smv.system.restaurant.models.dto.UserDTO;
 import ru.smv.system.restaurant.repository.RestaurantRepository;
 import ru.smv.system.restaurant.repository.UserRepository;
 import ru.smv.system.restaurant.repository.VotingRepository;
+import ru.smv.system.restaurant.security.AuthorizedUser;
 import ru.smv.system.restaurant.security.SecurityUtils;
 
 import java.time.LocalDate;
@@ -42,7 +43,7 @@ public class VotingController {
     ) throws NotFoundException {
         Assert.notNull(restaurantId, "Параметр строки обращения не корректен.");
 
-        UserDTO currentUser = SecurityUtils.currentAuthentication();
+        AuthorizedUser currentUser = SecurityUtils.currentAuthentication();
         if(currentUser == null){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Пользователь не авторизован");
         }
@@ -51,11 +52,11 @@ public class VotingController {
                 .orElseThrow(() -> new NotFoundException(
                         "Ресторан не найден. Возможно данный ресторан отсутствует в системе."));
 
-        UserEntity userEntity = userRepository.findById(currentUser.getId())
+        UserEntity userEntity = userRepository.findByLogin(currentUser.getUsername())
                 .orElseThrow(() -> new NotFoundException(
                 "Пользователь под которым осуществелн вход не найден. Возможно данный пользователь отсутствует в системе."));
 
-        Optional<VotingEntity> optionalVotingEntity = votingRepository.findByUserIdAndReportDate(currentUser.getId(), LocalDate.now());
+        Optional<VotingEntity> optionalVotingEntity = votingRepository.findByUserIdAndReportDate(userEntity.getId(), LocalDate.now());
         boolean isNewVoting = !optionalVotingEntity.isPresent();
 
         if(LocalTime.now().isBefore(LocalTime.of(11,0,0)) && !isNewVoting){
