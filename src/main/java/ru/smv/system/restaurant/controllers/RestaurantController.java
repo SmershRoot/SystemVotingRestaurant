@@ -7,12 +7,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import ru.smv.system.restaurant.constants.AccessPath;
+import ru.smv.system.restaurant.exception.ForbiddenException;
 import ru.smv.system.restaurant.exception.NotFoundException;
 import ru.smv.system.restaurant.models.db.MenuEntity;
 import ru.smv.system.restaurant.models.db.RestaurantEntity;
 import ru.smv.system.restaurant.models.dto.MenuDTO;
 import ru.smv.system.restaurant.models.dto.RestaurantDTO;
 import ru.smv.system.restaurant.repository.RestaurantRepository;
+import ru.smv.system.restaurant.security.AuthorizedUser;
+import ru.smv.system.restaurant.security.SecurityRole;
+import ru.smv.system.restaurant.security.SecurityUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,11 +26,15 @@ import java.util.stream.Collectors;
 @RestController
 public class RestaurantController {
 
-    @Autowired
-    RestaurantRepository restaurantRepository;
+    private final RestaurantRepository restaurantRepository;
+
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    ObjectMapper objectMapper;
+    public RestaurantController(RestaurantRepository restaurantRepository, ObjectMapper objectMapper) {
+        this.restaurantRepository = restaurantRepository;
+        this.objectMapper = objectMapper;
+    }
 
     @RequestMapping(path = AccessPath.API_RESTAURANTS, method = RequestMethod.GET)
     public List<RestaurantDTO> getRestaurants(
@@ -35,6 +43,12 @@ public class RestaurantController {
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "pageSize", required = false) Integer pageSize
     ) throws IOException {
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN) &&
+                !authorizedUser.getAuthorities().contains(SecurityRole.USER)){
+            throw new ForbiddenException();
+        }
+
         Sort sort;
         if(jsonSort == null || jsonSort.isEmpty()) {
             sort = new Sort(Sort.DEFAULT_DIRECTION, "name");
@@ -43,14 +57,19 @@ public class RestaurantController {
         }
 
         List<RestaurantEntity> restaurants = restaurantRepository.findAll(sort);
-        return restaurants.stream().map(r -> new RestaurantDTO(r)).collect(Collectors.toList());
+        return restaurants.stream().map(RestaurantDTO::new).collect(Collectors.toList());
     }
 
     @RequestMapping(path = AccessPath.API_RESTAURANTS_SUD, method = RequestMethod.GET)
     public RestaurantDTO getRestaurant(
             @PathVariable Long restaurantId
             ) throws NotFoundException {
-        //TODO только зарегистрировавшийся
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN) &&
+                !authorizedUser.getAuthorities().contains(SecurityRole.USER)){
+            throw new ForbiddenException();
+        }
+
         Assert.notNull(restaurantId, "Параметр строки обращения не корректен.");
         RestaurantEntity restaurantEntity = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new NotFoundException(
@@ -64,7 +83,11 @@ public class RestaurantController {
     public RestaurantDTO createRestaurant(
             @RequestBody RestaurantDTO restaurant
     ){
-        //TODO только администратор
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN)){
+            throw new ForbiddenException();
+        }
+
         Assert.notNull(restaurant, "Ресторан не заполнен.");
         RestaurantEntity restaurantEntity = addDataRestaurantEntityFromDto(new RestaurantEntity(), restaurant, false);
         return new RestaurantDTO(restaurantRepository.save(restaurantEntity));
@@ -75,7 +98,11 @@ public class RestaurantController {
             @RequestParam(name = "updateMenu" ,required = false, defaultValue = "false") boolean updateMenu,
             @RequestBody RestaurantDTO restaurant
     ) throws NotFoundException {
-        //TODO только администратор
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN)){
+            throw new ForbiddenException();
+        }
+
         Assert.notNull(restaurant, "Ресторан не заполнен.");
         RestaurantEntity restaurantEntity = restaurantRepository.findById(restaurant.getId())
                 .orElseThrow(() -> new NotFoundException(
@@ -113,8 +140,12 @@ public class RestaurantController {
     @RequestMapping(path = AccessPath.API_RESTAURANTS_SUD, method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteRestaurant(@PathVariable Long restaurantId){
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN)){
+            throw new ForbiddenException();
+        }
+
         Assert.notNull(restaurantId, "Параметр строки обращения не корректен.");
-        //TODO только администратор
         restaurantRepository.deleteById(restaurantId);
     }
     

@@ -13,6 +13,7 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private String patronymic;
+    private String email;
 
     public UserDTO (UserEntity user){
         this.id = user.getId();
@@ -20,5 +21,6 @@ public class UserDTO {
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.patronymic = user.getPatronymic();
+        this.email = user.getEmail();
     }
 }

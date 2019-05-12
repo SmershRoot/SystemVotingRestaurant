@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.smv.system.restaurant.constants.AccessPath;
 import ru.smv.system.restaurant.exception.ForbiddenException;
+import ru.smv.system.restaurant.exception.NotFoundException;
 import ru.smv.system.restaurant.models.db.UserEntity;
 import ru.smv.system.restaurant.models.dto.UserDTO;
 import ru.smv.system.restaurant.repository.UserRepository;
@@ -17,9 +20,6 @@ import ru.smv.system.restaurant.security.SecurityRole;
 import ru.smv.system.restaurant.security.SecurityUtils;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -68,16 +68,39 @@ public class UserController {
 
     @RequestMapping(path = AccessPath.API_USERS, method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDTO createUser(@RequestBody UserDTO userDto) throws NoSuchAlgorithmException {
+    public UserDTO createUser(@RequestBody UserDTO userDto) {
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN) &&
+                authorizedUser.getAuthorities().contains(SecurityRole.USER)){
+            throw new ForbiddenException();
+        }
+
         Assert.notNull(userDto, "Пользователь не заполнен.");
         Assert.notNull(userDto.getPassword(), "У пользователя не задан пароль.");
+
+        if(userRepository.findByLogin(userDto.getLogin()).isPresent()){
+            throw new ForbiddenException("Пользователь "+ userDto.getLogin() + " уже существует");
+        }
+        if(userRepository.findByEmail(userDto.getEmail()).isPresent()){
+            throw new ForbiddenException("Пользователь c email "+ userDto.getEmail() + " уже существует");
+        }
+
         UserEntity user = addDataUserEntityFromDto(new UserEntity(), userDto);
 
         return new UserDTO(userRepository.save(user));
     }
 
     @RequestMapping(path = AccessPath.API_USERS_SUD, method = RequestMethod.GET)
-    public UserDTO getUser(@PathVariable Long userId){
+    public UserDTO getUser(@PathVariable Long userId) throws NotFoundException {
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        UserEntity authorizedUserEntity = userRepository.findByLogin(authorizedUser.getUsername())
+                .orElseThrow(() -> new NotFoundException("Пользователь под которым осуществлен вход не найден в системе"));
+
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN) &&
+                (!authorizedUserEntity.getId().equals(userId))){
+            throw new ForbiddenException();
+        }
+
         Assert.notNull(userId, "Параметр строки обращения не корректен.");
         Optional<UserEntity> optionalUser = userRepository.findById(userId);
         if(optionalUser.isPresent()){
@@ -89,34 +112,57 @@ public class UserController {
     @RequestMapping(path = AccessPath.API_USERS, method = RequestMethod.PUT)
     public UserDTO updateUser(
             @RequestBody UserDTO userDto
-    ) throws NoSuchAlgorithmException {
+    ) throws NotFoundException {
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        UserEntity authorizedUserEntity = userRepository.findByLogin(authorizedUser.getUsername())
+                .orElseThrow(() -> new NotFoundException("Пользователь под которым осуществлен вход не найден в системе"));
+
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN) &&
+                !authorizedUserEntity.getId().equals(userDto.getId())){
+            throw new ForbiddenException();
+        }
+
         Assert.notNull(userDto, "Пользователь не заполнен.");
         Optional<UserEntity> optionalUser = userRepository.findById(userDto.getId());
         if(!optionalUser.isPresent()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         UserEntity user = addDataUserEntityFromDto(optionalUser.get(), userDto);
-        //TODO Если по себе меняем или админ
 
         return new UserDTO(userRepository.save(user));
     }
 
     @RequestMapping(path = AccessPath.API_USERS_SUD, method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable Long userId){
+    public void deleteUser(@PathVariable Long userId) throws NotFoundException {
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        UserEntity authorizedUserEntity = userRepository.findByLogin(authorizedUser.getUsername())
+                .orElseThrow(() -> new NotFoundException("Пользователь под которым осуществлен вход не найден в системе"));
+
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN) &&
+                !authorizedUserEntity.getId().equals(userId)){
+            throw new ForbiddenException();
+        }
+
         Assert.notNull(userId, "Параметр строки обращения не корректен.");
-        //TODO Если по себе меняем или админ
+
         userRepository.deleteById(userId);
     }
 
-    private UserEntity addDataUserEntityFromDto(UserEntity userEntity, UserDTO userDto) throws NoSuchAlgorithmException {
+    private UserEntity addDataUserEntityFromDto(UserEntity userEntity, UserDTO userDto) {
         userEntity.setLogin(userDto.getLogin());
+        userEntity.setEmail(userDto.getEmail());
         userEntity.setFirstName(userDto.getFirstName());
         userEntity.setLastName(userDto.getLastName());
         userEntity.setPatronymic(userDto.getPatronymic());
         userEntity.setSecurityRoleId(SecurityRole.USER.getId());
         if(userDto.getPassword()!=null){
-            userEntity.setPassword(createMd5FromText(userDto.getPassword()));
+
+
+            userEntity.setPassword(
+                    PasswordEncoderFactories
+                            .createDelegatingPasswordEncoder()
+                            .encode(userDto.getPassword()));
         }
 
         return userEntity;
@@ -128,46 +174,39 @@ public class UserController {
             @PathVariable Long userId,
             @RequestParam(name = "current", required = false) String currentPass,
             @RequestParam(name = "new") String newPass
-    ) throws NoSuchAlgorithmException {
+    ) throws NotFoundException {
+        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+        UserEntity authorizedUserEntity = userRepository.findByLogin(authorizedUser.getUsername())
+                .orElseThrow(() -> new NotFoundException("Пользователь под которым осуществлен вход не найден в системе"));
+
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN) &&
+                !authorizedUserEntity.getId().equals(userId)){
+            throw new ForbiddenException();
+        }
+
         Assert.notNull(userId, "Параметр строки обращения не корректен.");
         Assert.notNull(newPass, "Пароль не может быть пустым.");
         Assert.isTrue(!newPass.isEmpty(), "Пароль не может быть пустым.");
-
-//        UserDTO userCurrent = SecurityUtils.currentAuthentication();
 
         Optional<UserEntity> optionalUser = userRepository.findById(userId);
         if(!optionalUser.isPresent()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         UserEntity user = optionalUser.get();
-        //TODO Если по себе меняем или админ
 
+        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         //Проверяем права пользователя
         //Если не Админ
-        if(SecurityRole.ADMIN.getId()!=(user/*Current*/.getSecurityRoleId())) {
-            if (user.getPassword().equals(createMd5FromText(currentPass))) {
-                user.setPassword(createMd5FromText(newPass));
+        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN)) {
+            if(passwordEncoder.matches(currentPass, user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(newPass));
             }
         } else {
             //Если Админ
-            user.setPassword(createMd5FromText(newPass));
+            user.setPassword(passwordEncoder.encode(newPass));
         }
 
         userRepository.save(user);
     }
-
-    private String createMd5FromText(String text) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.reset();
-        md.update(text.getBytes());
-        byte[] digest = md.digest();
-        BigInteger bigInt = new BigInteger(1,digest);
-        StringBuilder hashtext = new StringBuilder(bigInt.toString(16));
-        while(hashtext.length() < 32 ){
-            hashtext.insert(0, "0");
-        }
-        return hashtext.toString();
-    }
-
 
 }

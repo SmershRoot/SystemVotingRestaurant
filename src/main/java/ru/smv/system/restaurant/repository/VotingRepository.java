@@ -6,7 +6,6 @@ import org.springframework.data.repository.query.Param;
 import ru.smv.system.restaurant.models.db.VotingEntity;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 public interface VotingRepository extends JpaRepository<VotingEntity, Long>, JpaSpecificationExecutor<VotingEntity> {

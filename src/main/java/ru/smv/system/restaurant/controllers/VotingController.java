@@ -12,7 +12,6 @@ import ru.smv.system.restaurant.models.db.RestaurantEntity;
 import ru.smv.system.restaurant.models.db.UserEntity;
 import ru.smv.system.restaurant.models.db.VotingEntity;
 import ru.smv.system.restaurant.models.dto.RestaurantDTO;
-import ru.smv.system.restaurant.models.dto.UserDTO;
 import ru.smv.system.restaurant.repository.RestaurantRepository;
 import ru.smv.system.restaurant.repository.UserRepository;
 import ru.smv.system.restaurant.repository.VotingRepository;
@@ -27,26 +26,30 @@ import java.util.stream.Collectors;
 @RestController
 public class VotingController {
 
-    @Autowired
-    VotingRepository votingRepository;
+    private final VotingRepository votingRepository;
+
+    private final RestaurantRepository restaurantRepository;
+
+    private final UserRepository userRepository;
 
     @Autowired
-    RestaurantRepository restaurantRepository;
-
-    @Autowired
-    UserRepository userRepository;
+    public VotingController(VotingRepository votingRepository, RestaurantRepository restaurantRepository, UserRepository userRepository) {
+        this.votingRepository = votingRepository;
+        this.restaurantRepository = restaurantRepository;
+        this.userRepository = userRepository;
+    }
 
     @RequestMapping(path = AccessPath.API_RESTAURANTS_SUD_VOTING, method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void voting(
             @PathVariable Long restaurantId
     ) throws NotFoundException {
-        Assert.notNull(restaurantId, "Параметр строки обращения не корректен.");
-
         AuthorizedUser currentUser = SecurityUtils.currentAuthentication();
         if(currentUser == null){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Пользователь не авторизован");
         }
+
+        Assert.notNull(restaurantId, "Параметр строки обращения не корректен.");
 
         RestaurantEntity restaurantEntity = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new NotFoundException(

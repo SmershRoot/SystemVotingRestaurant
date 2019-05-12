@@ -1,10 +1,13 @@
 package ru.smv.system.restaurant.models.db;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
 @NoArgsConstructor
@@ -16,6 +19,10 @@ public class UserEntity extends AbstractEntity {
 
     @Column(name = "PASSWORD")
     private String password;
+
+    @Email
+    @Column(name = "EMAIL")
+    private String email;
 
     @Column(name = "FIRST_NAME")
     private String firstName;

@@ -6,7 +6,7 @@ public class AccessPath {
     public static final String LOGOUT = "/logout";
     public static final String REGISTER = "/register";
 
-    public static final String API = "/api";
+    private static final String API = "/api";
     public static final String API_USERS = API + "/users";
     public static final String API_USERS_SUD = API_USERS + "/{userId}";
     public static final String API_USERS_PASSWORD = API_USERS_SUD + "/password";

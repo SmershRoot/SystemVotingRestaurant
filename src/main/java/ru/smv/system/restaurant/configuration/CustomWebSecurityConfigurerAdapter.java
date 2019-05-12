@@ -1,4 +1,4 @@
-package ru.smv.system.restaurant.security;
+package ru.smv.system.restaurant.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import ru.smv.system.restaurant.constants.AccessPath;
+import ru.smv.system.restaurant.security.CustomUserDetailsService;
 
 import javax.sql.DataSource;
 
@@ -20,16 +21,19 @@ import javax.sql.DataSource;
 //https://o7planning.org/ru/11705/create-a-login-application-with-spring-boot-spring-security-jpa
 public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
+
+    private final DataSource dataSource;
 
     @Autowired
-    private DataSource dataSource;
+    public CustomWebSecurityConfigurerAdapter(CustomUserDetailsService userDetailsService, DataSource dataSource) {
+        this.userDetailsService = userDetailsService;
+        this.dataSource = dataSource;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder(){
-        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        return passwordEncoder;
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @Autowired
@@ -75,9 +79,11 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
         http.authorizeRequests().and().exceptionHandling().accessDeniedPage("/403");
 
         // Config Remember Me.
+        //24часа
+        int tokenValiditySeconds = 24 * 60 * 60;
         http.authorizeRequests().and() //
                 .rememberMe().tokenRepository(this.persistentTokenRepository()) //
-                .tokenValiditySeconds(1 * 24 * 60 * 60); // 24h
+                .tokenValiditySeconds(tokenValiditySeconds);
     }
 
     @Bean
