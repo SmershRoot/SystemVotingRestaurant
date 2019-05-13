@@ -14,8 +14,7 @@ public class AbstractEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID")
     private Long id;
-
-    @Column(name = "CREATE_DATE")
+    @Column(name = "CREATE_DATE", nullable = false, columnDefinition = "timestamp default now()")
     private LocalDateTime createDate;
 
     @Column(name = "MODIFIED_DATE")
