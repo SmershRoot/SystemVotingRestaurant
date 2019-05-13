@@ -64,11 +64,11 @@ public class RestaurantController {
     public RestaurantDTO getRestaurant(
             @PathVariable Long restaurantId
             ) throws NotFoundException {
-        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
-        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN) &&
-                !authorizedUser.getAuthorities().contains(SecurityRole.USER)){
-            throw new ForbiddenException();
-        }
+//        AuthorizedUser authorizedUser = SecurityUtils.currentAuthentication();
+//        if(!authorizedUser.getAuthorities().contains(SecurityRole.ADMIN) &&
+//                !authorizedUser.getAuthorities().contains(SecurityRole.USER)){
+//            throw new ForbiddenException();
+//        }
 
         Assert.notNull(restaurantId, "Параметр строки обращения не корректен.");
         RestaurantEntity restaurantEntity = restaurantRepository.findById(restaurantId)

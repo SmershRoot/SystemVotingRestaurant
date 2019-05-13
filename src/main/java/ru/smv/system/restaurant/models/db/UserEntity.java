@@ -1,11 +1,14 @@
 package ru.smv.system.restaurant.models.db;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -18,6 +21,8 @@ public class UserEntity extends AbstractEntity {
     private String login;
 
     @Column(name = "PASSWORD")
+    @NotBlank
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Email
@@ -32,7 +37,7 @@ public class UserEntity extends AbstractEntity {
 
     @Column(name = "PATRONYMIC")
     private String patronymic;
-
+    
     @Column(name = "SECURITY_ROLE_ID")
     private Integer securityRoleId;
 }
