@@ -79,13 +79,6 @@ public class UserController {
         Assert.notNull(userDto, "Пользователь не заполнен.");
         Assert.notNull(userDto.getPassword(), "У пользователя не задан пароль.");
 
-        if(userRepository.findByLogin(userDto.getLogin()).isPresent()){
-            throw new ForbiddenException("Пользователь "+ userDto.getLogin() + " уже существует");
-        }
-        if(userRepository.findByEmail(userDto.getEmail()).isPresent()){
-            throw new ForbiddenException("Пользователь c email "+ userDto.getEmail() + " уже существует");
-        }
-
         UserEntity user = addDataUserEntityFromDto(new UserEntity(), userDto);
 
         return new UserDTO(userRepository.save(user));
@@ -128,6 +121,7 @@ public class UserController {
         if(!optionalUser.isPresent()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
+
         UserEntity user = addDataUserEntityFromDto(optionalUser.get(), userDto);
 
         return new UserDTO(userRepository.save(user));
@@ -151,16 +145,21 @@ public class UserController {
     }
 
     private UserEntity addDataUserEntityFromDto(UserEntity userEntity, UserDTO userDto) {
-        userEntity.setLogin(userDto.getLogin());
-        userEntity.setEmail(userDto.getEmail());
+        if(userRepository.findByLogin(userDto.getLogin()).isPresent()){
+            throw new ForbiddenException("Пользователь "+ userDto.getLogin() + " уже существует");
+        }
+        if(userRepository.findByEmail(userDto.getEmail()).isPresent()){
+            throw new ForbiddenException("Пользователь c email "+ userDto.getEmail() + " уже существует");
+        }
+
+        userEntity.setLogin(userDto.getLogin().toLowerCase());
+        userEntity.setEmail(userDto.getEmail().toLowerCase());
         userEntity.setFirstName(userDto.getFirstName());
         userEntity.setLastName(userDto.getLastName());
         userEntity.setPatronymic(userDto.getPatronymic());
         userEntity.setSecurityRoleId(SecurityRole.USER.getId());
         userEntity.setModifiedDate(LocalDateTime.now());
         if(userDto.getPassword()!=null){
-
-
             userEntity.setPassword(
                     PasswordEncoderFactories
                             .createDelegatingPasswordEncoder()
