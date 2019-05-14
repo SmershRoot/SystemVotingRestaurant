@@ -15,6 +15,7 @@ import ru.smv.system.restaurant.models.dto.RestaurantDTO;
 import ru.smv.system.restaurant.repository.RestaurantRepository;
 import ru.smv.system.restaurant.repository.UserRepository;
 import ru.smv.system.restaurant.repository.VotingRepository;
+import ru.smv.system.restaurant.repository.specification.AllSpecification;
 import ru.smv.system.restaurant.security.AuthorizedUser;
 import ru.smv.system.restaurant.security.SecurityUtils;
 
@@ -87,7 +88,8 @@ public class VotingController {
     ){
         Map<RestaurantDTO, Long> result = new HashMap<>();
 
-        List<RestaurantEntity> allRestaurant = restaurantRepository.findAll();
+        List<RestaurantEntity> allRestaurant = restaurantRepository
+                .findAll(AllSpecification.getRestaurantWithMenuByDate(reportDate));
         allRestaurant.forEach((restaurantEntity) -> result.put(new RestaurantDTO(restaurantEntity),
                 votingRepository.countByRestaurantIdAndReportDate(restaurantEntity.getId(),(reportDate == null?LocalDate.now():reportDate))));
 
