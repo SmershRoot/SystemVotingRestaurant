@@ -71,6 +71,7 @@ public class UserControlletTestIT {
         user.setLastName("testLastName");
         user.setFirstName("testFirstName");
         user.setPatronymic("testPatronymic");
+        user.setEmail("DD@fr.ru");
 
         String jsonUserDTO = objectMapper.writeValueAsString(user);
 

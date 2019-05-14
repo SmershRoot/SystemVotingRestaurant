@@ -19,6 +19,7 @@ import ru.smv.system.restaurant.security.SecurityRole;
 import ru.smv.system.restaurant.security.SecurityUtils;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -120,6 +121,7 @@ public class RestaurantController {
         restaurantEntity.setNote(restaurantDTO.getNote());
         restaurantEntity.setEmail(restaurantDTO.getEmail());
         restaurantEntity.setTimeWork(restaurantDTO.getTimeWork());
+        restaurantEntity.setModifiedDate(LocalDateTime.now());
 
         if(updateMenu) {
             Set<MenuDTO> menus = restaurantDTO.getMenus();

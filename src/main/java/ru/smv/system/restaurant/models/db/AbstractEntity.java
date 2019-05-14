@@ -15,7 +15,7 @@ public class AbstractEntity implements Serializable {
     @Column(name = "ID")
     private Long id;
     @Column(name = "CREATE_DATE", nullable = false, columnDefinition = "timestamp default now()")
-    private LocalDateTime createDate;
+    private LocalDateTime createDate = LocalDateTime.now();
 
     @Column(name = "MODIFIED_DATE")
     private LocalDateTime modifiedDate;

@@ -20,6 +20,7 @@ import ru.smv.system.restaurant.security.SecurityRole;
 import ru.smv.system.restaurant.security.SecurityUtils;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -156,6 +157,7 @@ public class UserController {
         userEntity.setLastName(userDto.getLastName());
         userEntity.setPatronymic(userDto.getPatronymic());
         userEntity.setSecurityRoleId(SecurityRole.USER.getId());
+        userEntity.setModifiedDate(LocalDateTime.now());
         if(userDto.getPassword()!=null){
 
 

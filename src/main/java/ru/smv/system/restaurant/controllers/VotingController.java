@@ -19,6 +19,7 @@ import ru.smv.system.restaurant.security.AuthorizedUser;
 import ru.smv.system.restaurant.security.SecurityUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,6 +75,7 @@ public class VotingController {
         newVotingEntity.setRestaurant(restaurantEntity);
         newVotingEntity.setReportDate(LocalDate.now());
         newVotingEntity.setUser(userEntity);
+        newVotingEntity.setModifiedDate(LocalDateTime.now());
 
         votingRepository.save(newVotingEntity);
     }
